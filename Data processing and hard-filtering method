@@ -1,0 +1,77 @@
+#data extraction
+#read talent data from mocked 'database'
+import csv
+
+#mocked talent pool with the following structure:
+#
+#   [[UID], [First Name], [Last Name], [Country location], [Available from],
+#    [Role], [Years of professional experience], [Skills], [Social links],
+#    [Short biography], [3x personality questions], [Tools], [Languages],
+#    [Work experience (Title, Company, Years, Industry)], [Projects],
+#    [Hourly rate($)], [Working hours]]
+#
+talent_pool = []
+
+with open('talents.csv', 'r') as csv_file:
+    csv_reader = csv.reader(csv_file)
+
+    #skip the first row which is header
+    next(csv_reader)
+
+    for row in csv_reader:
+      lst = []
+
+      for col in row:
+        if col == row[7] or col == row[11] or col == row[12]:
+          if ',' in col:
+            col = col.split(',')
+            lst.append(col)
+            continue
+        lst.append([col])
+      talent_pool.append(lst)
+################################################################################
+#mocked roles pool with the following structure:
+#
+#   [[Project name], [Project ID], [Role name], [Role description], [Hourly rate],
+#    [Required skills], [Preferred skills], [Tools], [Time zone], [Available from],
+#    [Minimum available hours per week], [Location], [Years of experience],
+#    [Language], [About me]]
+role_pool = []
+
+with open('roles.csv', 'r') as csv_file:
+    csv_reader = csv.reader(csv_file)
+
+    #skip the first row which is header
+    next(csv_reader)
+
+    for row in csv_reader:
+      lst = []
+
+      for col in row:
+        if col == row[5] or col == row[6] or col == row[7] or col == row[13]:
+          if ',' in col:
+            col = col.split(',')
+            lst.append(col)
+            continue
+        lst.append([col])
+      role_pool.append(lst)
+################################################################################
+#hard filtering algorithm for a specific role
+#it removes a talent from the talent pool if:
+#   - the talent does not possess any required skills
+#   - the talent is not in the same location as required by the role
+#   - the talent cannot speak any required languages
+#
+#input parameters: talent pool of the role, the information of the role
+def hardFiltering(talent_pool, role):
+  hf_talent_pool = []
+
+  for talent in talent_pool:
+    #compare talent's skills with the required skills
+    if (set(talent[7]) & set(role[5])):
+      #compare the location
+      if (set(talent[3]) & set(role[11])):
+        #compare the language
+        if (set(talent[12]) & set(role[13])):
+          hf_talent_pool.append(talent)
+  return hf_talent_pool
